@@ -5,6 +5,7 @@
             [clojure.string :as str]
             [clojure.test :refer [deftest is testing]]
             [design-quality.audit :as dq]
+            [hanmen.page :as hanmen]
             [mokuroku.catalog :as catalog]
             [mokuroku.item :as item]))
 
@@ -91,3 +92,51 @@
     (println "design-quality: aggregate" overall)
     (is (>= overall 98.0) (pr-str (:findings report)))
     (doseq [[nm r] pages] (is (>= (:overall r) 98.0) nm))))
+
+;; ── the drawn page ───────────────────────────────────────────────────────────
+
+(deftest the-selected-page-is-drawn-and-not-only-described
+  ;; The gap the listing left: it said a page was 595×842 with 2,587
+  ;; characters of text and could not show one of them. The fields of the
+  ;; value are not the value.
+  (let [drawn {0 (hanmen/page {:index 0 :width 200 :height 100
+                               :items [(hanmen/text-item {:x 10 :y 20 :size 12
+                                                          :text "本契約書"})]})}
+        cat (catalog/select (cat-of [{:index 0 :label "Page 1"
+                                              :text-chars 4 :width 200 :height 100}]) 0)
+        html (page/render-html cat {:pages drawn})]
+    (is (str/includes? html "<svg") "the page itself")
+    (is (str/includes? html "本契約書") "with what is on it")
+    (is (str/includes? html "app-preview__page"))
+    (testing "and the listing is still there underneath"
+      (is (str/includes? html "Page 1")))))
+
+(deftest a-page-the-host-did-not-render-adds-nothing
+  ;; A blank card under the toolbar reads as something that failed to load.
+  (let [cat (catalog/select (cat-of [{:index 0 :label "Page 1"
+                                              :text-chars 4}]) 0)]
+    (is (= (page/render-html cat {}) (page/render-html cat {:pages {}})))
+    (is (not (str/includes? (page/render-html cat {}) "app-preview__page")))))
+
+(deftest a-scanned-page-says-why-selecting-text-does-nothing
+  (let [drawn {0 (hanmen/page {:index 0 :width 100 :height 100
+                               :items [(hanmen/frame-item {:x 0 :y 0 :width 100
+                                                           :height 100
+                                                           :label "Im1"})]})}
+        cat (catalog/select (cat-of [{:index 0 :label "Page 1"
+                                               :text-chars 0}]) 0)
+        html (page/render-html cat {:pages drawn})]
+    (is (str/includes? html "抽出できるテキストがありません"))))
+
+(deftest the-drawn-page-loads-nothing-unless-the-host-says-where-from
+  ;; `hanmen` outlines an image rather than drawing it until an
+  ;; `:image-href` arrives, so a host that has not decided its CSP is not
+  ;; forced to.
+  (let [drawn {0 (hanmen/page {:index 0 :width 10 :height 10
+                               :items [(hanmen/image-item {:x 0 :y 0 :width 10
+                                                           :height 10 :index 0})]})}
+        cat (catalog/select (cat-of [{:index 0 :label "Page 1"}]) 0)]
+    (is (not (str/includes? (page/render-html cat {:pages drawn}) "href=")))
+    (is (str/includes? (page/render-html cat {:pages drawn
+                                              :image-href (fn [_] "/img/0")})
+                       "href=\"/img/0\""))))
