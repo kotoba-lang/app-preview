@@ -7,6 +7,18 @@ Design: [ADR-2608035000](https://github.com/com-junkawasaki/root/blob/main/90-do
 Capability: `fs/browse`. Nothing in this repo performs the effect — the host
 supplies the provider function, and that is where the grant is spent.
 
+**The selected page is drawn**, by `kotoba-lang/hanmen`. A host that has
+spent the grant hands over page values — a size, a rotation, placed marks —
+and `page/render` puts the selected one above the listing:
+
+```clojure
+(page/render cat {:pages {0 page-value} :image-href (fn [{:keys [index]}] …)})
+```
+
+Decoding is still nobody's job here. Without `:pages` this is the listing it
+always was, and without `:image-href` the drawn page loads nothing at all —
+a host that has not decided its CSP is not forced to.
+
 ## Three decisions
 
 **Identity is the page index, not the printed label.** A document with front
@@ -35,4 +47,5 @@ clojure -M:test          # pinned git deps
 clojure -M:lint
 ```
 
-design-quality: 100.00 on every window state including awaiting-grant (2026-08-03).
+design-quality: 100.00 on every window state including awaiting-grant
+(2026-08-03) and with a page drawn (2026-08-05).

@@ -4,7 +4,12 @@
          :git/sha "00f0bfcd134879712d4b102e6d1ea4da5e37ad7b"}
         io.github.kotoba-lang/mokuroku-ui
         {:git/url "https://github.com/kotoba-lang/mokuroku-ui.git"
-         :git/sha "58f358c392b254c9c733a1ef13c55e9960710c3f"}}
+         :git/sha "f950a4b2a1414e49c26a8b44c262c2b5e4b46f70"}
+        ;; Drawing only. Nothing here parses a file — a host that has spent
+        ;; the `fs/browse` grant hands over page values.
+        io.github.kotoba-lang/hanmen
+        {:git/url "https://github.com/kotoba-lang/hanmen.git"
+         :git/sha "f4ffe8bda5a25b8a38845443f1633857f79fe224"}}
  :aliases
  {:test {:extra-paths ["test"]
          :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
@@ -15,7 +20,8 @@
                        :git/sha "fb766e2f79c088de05e289554c9de049e7909bd3"}}
          :main-opts ["-m" "cognitect.test-runner"]
          :exec-fn cognitect.test-runner.api/test}
-  :local {:override-deps {io.github.kotoba-lang/mokuroku {:local/root "../mokuroku"}
+  :local {:override-deps {io.github.kotoba-lang/hanmen {:local/root "../hanmen"}
+                          io.github.kotoba-lang/mokuroku {:local/root "../mokuroku"}
                           io.github.kotoba-lang/mokuroku-ui {:local/root "../mokuroku-ui"}
                           io.github.kotoba-lang/kotoba-ui {:local/root "../kotoba-ui"}
                           io.github.kotoba-lang/appkit {:local/root "../appkit"}
