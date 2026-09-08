@@ -2,7 +2,7 @@
   (:require [app-preview.model :as model]
             [app-preview.page :as page]
             [app-preview.source :as source]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [design-quality.audit :as dq]
             [hanmen.page :as hanmen]
