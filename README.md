@@ -42,9 +42,9 @@ format is simply unsupported sends them somewhere useless. Decoding itself is
 ## Test
 
 ```sh
-clojure -M:local:test    # sibling checkouts
-clojure -M:test          # pinned git deps
-clojure -M:lint
+kbb -M:local:test    # sibling checkouts
+kbb -M:test          # pinned git deps
+kbb -M:lint
 ```
 
 design-quality: 100.00 on every window state including awaiting-grant
