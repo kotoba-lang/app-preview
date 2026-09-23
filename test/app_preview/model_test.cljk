@@ -3,7 +3,7 @@
             [app-preview.page :as page]
             [app-preview.source :as source]
             [kotoba.lang.text :as str]
-            [clojure.test :refer [deftest is testing]]
+            [kotoba.test :refer [deftest is testing]]
             [design-quality.audit :as dq]
             [hanmen.page :as hanmen]
             [mokuroku.catalog :as catalog]
