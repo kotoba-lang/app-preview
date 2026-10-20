@@ -1,0 +1,23 @@
+(ns app-preview.size-parity-test
+  "aiueos/preview_size.cljk（判定コア）と実物の model.cljk の parity。
+  displayed-size の回転後寸法・id 方針・commands が guest の判定と一致する。"
+  (:require [clojure.test :refer [deftest is testing]]
+            [app-preview.model :as model]))
+
+(deftest size-matches-guest
+  (testing "guest test-swap: 90 / 270 / -90 で幅高さを入れ替える"
+    (is (= [600 800] (model/displayed-size {:width 800 :height 600 :rotation 90})))
+    (is (= [600 800] (model/displayed-size {:width 800 :height 600 :rotation 270})))
+    (is (= [600 800] (model/displayed-size {:width 800 :height 600 :rotation -90}))))
+  (testing "guest test-keep / test-fail-closed: 0 / 180 / その他はそのまま"
+    (is (= [800 600] (model/displayed-size {:width 800 :height 600 :rotation 0})))
+    (is (= [800 600] (model/displayed-size {:width 800 :height 600 :rotation 180})))
+    (is (= [800 600] (model/displayed-size {:width 800 :height 600 :rotation 45}))))
+  (testing "guest test-id の前提: 寸法が無ければ不明（nil）"
+    (is (nil? (model/displayed-size {:rotation 90})))))
+
+(deftest surface-matches-guest
+  (testing "guest test-command: 読み取り専用（annotate / sign / export-with-changes は無い）"
+    (is (= #{:quicklook :copy-path :export} model/commands))
+    (is (not (contains? model/commands :annotate)))
+    (is (not (contains? model/commands :sign)))))

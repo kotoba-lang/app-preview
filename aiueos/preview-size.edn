@@ -1,0 +1,17 @@
+;; app-preview — itonami（dapp）の aiueos アプリ記述子（notes.edn 形）。
+;; 判定コアは aiueos/preview_size.cljk（回転後寸法・id 方針・読み取り専用）。
+;; 正本は src/app_preview/model.cljk。pure（:effects #{}）。
+{:aiueos/component :app/preview-size
+ :aiueos/kind :app
+ :aiueos/trust :untrusted
+ :aiueos/source "preview_size.cljk"
+ :aiueos/wasm "preview_size.wasm"
+ :aiueos/entry "main"
+ :aiueos/args []
+ :aiueos/imports #{}
+ :aiueos/exports #{:app/main
+                   :app/size-swap
+                   :app/page-id-ok
+                   :app/command-admissible}
+ :aiueos/effects #{}
+ :aiueos/limits {:memory-pages 16 :fuel 5000000}}

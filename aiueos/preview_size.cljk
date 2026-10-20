@@ -1,0 +1,59 @@
+(ns preview.size
+  "preview 判定コア — itonami dapp bundle（pure, :effects #{}）。
+
+  ページ表示の判定（正本: src/app_preview/model.cljk）:
+
+  - **表示サイズは回転後の幅高さ**: PDF のページは media box とは独立に
+    回転を持つ。回転前の box を報告すると横長ページが縦長に見え、
+    サムネイルグリッドがすべて崩れる。rotation が 90 / 270 / -90 のとき
+    幅高さを入れ替える。
+  - **id はページ index（安定）であって印刷ラベルではない** —— 前付けの
+    ある文書は同じ印刷ラベルのページが複数ある。
+  - コマンドは **quicklook / copy-path / export のみの読み取り専用** ——
+    annotate / sign / export-with-changes は無い。「表示中の文書を書き換え
+    られる viewer は別のプログラム」。
+
+  size-swap: 1 = 幅高さを入れ替える（90 / 270 / -90）/ 0 = そのまま
+  page-id-ok: 1 = id にページ index、0 = 印刷ラベル等（違反）
+  command-admissible: 1 = 0..2（quicklook/copy-path/export）の内
+
+  実行 host はスカラーのみ = KIR v3 / i64/direct ABI（kernel/selfhost 両対応）。
+
+  テストはゼロ引数 test-*、戻り 1/0:
+  <amu> test aiueos/preview_size.cljk"
+  (:export [main size-swap page-id-ok command-admissible
+            test-swap test-keep test-id test-command test-fail-closed]))
+
+(defn main [] :i64
+  0)
+
+(defn size-swap [rotation :i64] :i64
+  (if (or (= rotation 90) (= rotation 270) (= rotation -90)) 1 0))
+
+(defn page-id-ok [is-index :i64 is-label :i64] :i64
+  (if (and (= is-index 1) (= is-label 0)) 1 0))
+
+(defn command-admissible [cmd :i64] :i64
+  (if (and (>= cmd 0) (<= cmd 2)) 1 0))
+
+;; --- tests（戻り 1 = pass） ------------------------------------------------
+
+(defn test-swap [] :i64
+  ;; 90 / 270 / -90 は入れ替え
+  (if (= (+ (size-swap 90) (size-swap 270) (size-swap -90)) 3) 1 0))
+
+(defn test-keep [] :i64
+  ;; 0 / 180 はそのまま
+  (if (= (+ (size-swap 0) (size-swap 180)) 0) 1 0))
+
+(defn test-id [] :i64
+  ;; id はページ index。印刷ラベルは前付けで重複しうる
+  (if (= (+ (page-id-ok 1 0) (page-id-ok 1 1) (page-id-ok 0 1)) 1) 1 0))
+
+(defn test-command [] :i64
+  ;; annotate / sign / export-with-changes は無い（読み取り専用）
+  (if (= (+ (command-admissible 0) (command-admissible 2) (command-admissible 3) (command-admissible 4)) 2) 1 0))
+
+(defn test-fail-closed [] :i64
+  ;; 知らない回転は入れ替えない（0 = そのまま）
+  (if (= (+ (size-swap 45) (size-swap 999)) 0) 1 0))
